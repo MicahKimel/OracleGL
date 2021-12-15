@@ -11,12 +11,7 @@ library(jsonlite)
 library(data.table)
 library(stringr)
 
-
-as400 <- dbConnect(odbc::odbc(), "Sunpac", uid = "DATAP015",
-                   pwd = "TannerP513")
-
 renameFunction <- function(SYSIBMtable, SYSIBMschema){
-
   
   AssetNames <- tbl(as400, sql(str_interp("select distinct *
     from SYSIBM.SQLCOLUMNS where Table_NAME = '${SYSIBMtable}' and 
@@ -24,18 +19,9 @@ renameFunction <- function(SYSIBMtable, SYSIBMschema){
   GetAssetNames <- as.data.frame(AssetNames, row.names = NULL, optional = FALSE) %>%
     select(COLUMN_NAME, COLUMN_TEXT)
   
-  
-  
   AssetSpread <- data.frame(as.list(GetAssetNames$COLUMN_TEXT))
-  
-  
-  
-  
   ASSETS <- tbl(as400, in_schema(SYSIBMschema, SYSIBMtable))
   ASSETS_df <- as.data.frame(ASSETS, row.names = NULL, optional = FALSE) 
-  
-  
-  
   Assets <- ASSETS_df %>%
     set_names(colnames(AssetSpread))
   
@@ -46,8 +32,6 @@ renameFunction <- function(SYSIBMtable, SYSIBMschema){
   setnames(Assets, columnNames)
   
   return(Assets)
-  
-  
 }
 
 SummaryBalanceReport <- function(TestFile){
